@@ -1,9 +1,9 @@
-"""STEP 5 - GENERATE: give retrieved chunks + question to the LLM (Hugging Face, free token)."""
-from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+"""STEP 5 - GENERATE: answer questions with a local Hugging Face model."""
+from langchain_huggingface import ChatHuggingFace, HuggingFacePipeline
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-from config import LLM_REPO, HF_TOKEN
+from config import LLM_REPO
 from step4_retrieve import get_retriever
 
 PROMPT = ChatPromptTemplate.from_messages([
@@ -16,16 +16,25 @@ PROMPT = ChatPromptTemplate.from_messages([
 
 
 def format_docs(docs):
-    return "\n\n".join(f"[{d.metadata['source']} p{d.metadata['page']}] {d.page_content}" for d in docs)
+    return "\n\n".join(
+        f"[{d.metadata.get('source', 'Unknown source')} "
+        f"p{d.metadata.get('page', 'unknown')}] {d.page_content}"
+        for d in docs
+    )
 
 
 def get_llm():
-    endpoint = HuggingFaceEndpoint(
-        repo_id=LLM_REPO, task="text-generation",
-        max_new_tokens=512, temperature=0.2,
-        huggingfacehub_api_token=HF_TOKEN,
+    model = HuggingFacePipeline.from_model_id(
+        model_id=LLM_REPO,
+        task="text-generation",
+        pipeline_kwargs={
+            "max_new_tokens": 512,
+            "temperature": 0.2,
+            "do_sample": True,
+            "return_full_text": False,
+        },
     )
-    return ChatHuggingFace(llm=endpoint)
+    return ChatHuggingFace(llm=model)
 
 
 def build_chain(retriever):

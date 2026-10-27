@@ -1,16 +1,16 @@
-# Class 12 RAG Tutor (LangChain + Unstructured + Hugging Face)
+# Egyptian AI Learning Assistant (LangChain + Unstructured + Hugging Face)
 
-Build a "chat with your notes" app. No paid API: embeddings run locally, the LLM uses a free Hugging Face token.
+A bilingual Gradio workspace for asking grounded questions about learning materials. The interface uses a proposed Egyptian learning-platform identity and is not an official Ministry service. Upload PDF, DOCX, or TXT notes, build a local vector index, and ask questions with supporting document excerpts. Embeddings and the Qwen2.5-1.5B-Instruct language model run locally, so model inference does not use a paid API or require an access token.
 
 ## Setup
 ```bash
 git clone <your-repo-url> && cd rag-class12
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env     # then paste your token
+cp .env.example .env
 ```
-Get the token: huggingface.co -> Settings -> Access Tokens -> New token -> tick **"Make calls to Inference Providers"**.
-Free usage has monthly limits, which is fine for a class demo. If a model stops working, change `HF_LLM_REPO` in `.env`.
+
+The model downloads from Hugging Face the first time generation runs. It needs several GB of disk space and enough memory to run locally; generation speed depends on your computer. Change `HF_LLM_REPO` in `.env` to select another compatible Hugging Face text-generation model.
 
 ## Run each step
 ```bash
@@ -47,5 +47,4 @@ git push -u origin main
 ## Troubleshooting
 - Slow first run: sentence-transformers downloads the embedding model (~90 MB) once.
 - PDF problems: scanned PDFs need OCR (install tesseract + poppler, use `strategy="hi_res"`).
-- 401/403 error: token missing, or "Inference Providers" permission not ticked.
-- Model not supported error: pick another chat model in `.env`.
+- Model loading or memory error: check available disk/RAM, or select a smaller compatible model in `.env`.
